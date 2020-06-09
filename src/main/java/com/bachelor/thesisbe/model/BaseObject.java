@@ -16,7 +16,6 @@ import java.util.Date;
 @Getter
 @ToString
 public abstract class BaseObject {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -23,15 +24,23 @@ public class UserEntity extends BaseObject {
 
     @Column(unique = true)
     private String email;
+
     @Column
     private String password;
+
     @Column
     private String firstName;
+
     @Column
     private String lastName;
+
     @Lob
     @Basic(fetch = FetchType.LAZY)
     private byte[] image;
     @Column
     String colorCode;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
+    Set<Forum> ownedForums;
+
 }

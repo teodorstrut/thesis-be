@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +50,7 @@ public class JwtUtils implements Serializable {
         claims.put("lastName", userDetails.getFirstName());
         claims.put("image", userDetails.getImage());
         claims.put("colorCode", userDetails.getColorCode());
+        claims.put("userId", userDetails.getId());
         return doGenerateToken(claims, userDetails.getEmail());
     }
 

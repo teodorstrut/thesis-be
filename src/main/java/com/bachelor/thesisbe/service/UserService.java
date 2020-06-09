@@ -39,4 +39,12 @@ public class UserService {
     public UserEntity getUserByEmail(String email) {
         return userRepo.findByEmail(email);
     }
+
+    public UserEntity getUserById(Long userId) {
+        if (userRepo.findById(userId).isPresent()) {
+            return userRepo.findById(userId).get();
+        } else {
+            return null;
+        }
+    }
 }
