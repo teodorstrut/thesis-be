@@ -3,10 +3,8 @@ package com.bachelor.thesisbe.model;
 import lombok.*;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -23,4 +21,6 @@ public class Forum extends BaseObject {
     private String name;
     @Column
     private String description;
+    @OneToMany(mappedBy = "forum")
+    private Set<Post> posts;
 }

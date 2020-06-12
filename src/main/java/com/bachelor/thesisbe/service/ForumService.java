@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -15,8 +16,8 @@ public class ForumService {
     @Autowired
     private ForumRepo repo;
 
-    public void addForum(UserEntity owner, String name, String description) {
-        repo.save(new Forum(owner, name, description));
+    public Forum addForum(UserEntity owner, String name, String description) {
+        return repo.save(new Forum(owner, name, description, new HashSet<>()));
     }
 
     public void deleteForum(Long forumId) {

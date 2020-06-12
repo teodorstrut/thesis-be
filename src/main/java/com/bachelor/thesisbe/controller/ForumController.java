@@ -23,9 +23,9 @@ public class ForumController {
     @PostMapping("/forums/create")
     public ResponseEntity<?> createForum(@RequestBody ForumViewModel viewModel) {
         UserEntity user = this.userService.getUserById(viewModel.getUserId());
-        this.forumService.addForum(user, viewModel.getForumName(), viewModel.getDescription());
+        Long forumId = this.forumService.addForum(user, viewModel.getForumName(), viewModel.getDescription()).getId();
         var response = new Object() {
-            public String response = "Forum added successfully";
+            public Long response = forumId;
         };
         return ResponseEntity.ok(response);
     }

@@ -34,13 +34,21 @@ public class UserEntity extends BaseObject {
     @Column
     private String lastName;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] image;
+    @Column
+    private String image;
     @Column
     String colorCode;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
     Set<Forum> ownedForums;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
+    Set<Post> ownedPosts;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
+    Set<Comment> ownedComments;
+
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    Set<Post> likedPosts;
 
 }
