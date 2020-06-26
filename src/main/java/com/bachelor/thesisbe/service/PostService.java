@@ -1,24 +1,26 @@
 package com.bachelor.thesisbe.service;
 
-import com.bachelor.thesisbe.model.Comment;
 import com.bachelor.thesisbe.model.Forum;
 import com.bachelor.thesisbe.model.Post;
 import com.bachelor.thesisbe.model.UserEntity;
 import com.bachelor.thesisbe.repo.PostRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PostService {
-    @Autowired
-    PostRepo repo;
+    private final PostRepo repo;
 
-    public Post addPost(String title, String description, UserEntity owner, Forum parentForum, byte[] imageBlob) {
-        return repo.save(new Post(
+    public PostService(PostRepo repo) {
+        this.repo = repo;
+    }
+
+    public void addPost(String title, String description, UserEntity owner, Forum parentForum, byte[] imageBlob) {
+        repo.save(new Post(
                 title,
                 description,
                 owner,
@@ -34,9 +36,9 @@ public class PostService {
     }
 
     public void deletePost(Long postId, UserEntity user) {
-        Post p = repo.findById(postId).get();
-        if (p.getOwner().getId().equals(user.getId())) {
-            repo.delete(p);
+        Optional<Post> p = repo.findById(postId);
+        if (p.isPresent() && p.get().getOwner().getId().equals(user.getId())) {
+            repo.delete(p.get());
         }
     }
 
@@ -51,7 +53,7 @@ public class PostService {
     }
 
     public Post getPostById(long postId) {
-        return repo.findById(postId).get();
+        return repo.findById(postId).orElse(null);
     }
 
     public void savePost(Post post) {

@@ -12,4 +12,8 @@ public interface CommentRepo extends CrudRepository<Comment, Long> {
     ArrayList<Comment> findAllByPostId_IdAndParentIdIsNull(Long postId);
 
     ArrayList<Comment> findAllByPostId_IdAndParentId_Id(Long postId, Long parentId);
+
+    ArrayList<Comment> findAllByParentId_Id(Long parentId);
+
+    void deleteByIdIn(ArrayList<Long> ids);
 }

@@ -3,7 +3,6 @@ package com.bachelor.thesisbe.service;
 import com.bachelor.thesisbe.model.UserEntity;
 import com.bachelor.thesisbe.repo.UserEntityRepo;
 import com.bachelor.thesisbe.views.RegisterViewModel;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,8 +11,11 @@ import java.util.Random;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserEntityRepo userRepo;
+    private final UserEntityRepo userRepo;
+
+    public UserService(UserEntityRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public List<UserEntity> getAllUsers() {
         List<UserEntity> userList = new ArrayList<>();

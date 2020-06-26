@@ -17,14 +17,15 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebSecurity
 @EnableWebMvc
 public class SecurityManager extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private EntryPoint entryPoint;
-    @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private JwtSecurityFilter jwtSecurityFilter;
-    @Autowired
-    private PasswordEncoderConfig encoder;
+    private final UserDetailsService userDetailsService;
+    private final JwtSecurityFilter jwtSecurityFilter;
+    private final PasswordEncoderConfig encoder;
+
+    public SecurityManager(UserDetailsService userDetailsService, JwtSecurityFilter jwtSecurityFilter, PasswordEncoderConfig encoder) {
+        this.userDetailsService = userDetailsService;
+        this.jwtSecurityFilter = jwtSecurityFilter;
+        this.encoder = encoder;
+    }
 
     @Bean
     @Override
@@ -41,9 +42,10 @@ public class SecurityManager extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/login", "/register").permitAll()
+                .antMatchers("/login", "/register", "/forums/all").permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .logout().and()
                 .cors().and()
                 .csrf().disable();
 

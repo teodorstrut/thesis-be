@@ -1,7 +1,6 @@
 package com.bachelor.thesisbe.model;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;

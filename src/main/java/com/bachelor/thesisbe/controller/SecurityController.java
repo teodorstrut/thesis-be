@@ -7,7 +7,6 @@ import com.bachelor.thesisbe.security.UserDetailsService;
 import com.bachelor.thesisbe.service.UserService;
 import com.bachelor.thesisbe.views.LoginViewModel;
 import com.bachelor.thesisbe.views.RegisterViewModel;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,41 +15,38 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class SecurityController {
-    @Autowired
-    private UserService service;
-    @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private PasswordEncoderConfig encoder;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtUtils jwtUtils;
+    private final UserService service;
+    private final UserDetailsService userDetailsService;
+    private final PasswordEncoderConfig encoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
-    @GetMapping("/all")
-    public List<UserEntity> getAllUsers() {
-        return service.getAllUsers();
+    public SecurityController(UserService service, UserDetailsService userDetailsService, PasswordEncoderConfig encoder, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+        this.service = service;
+        this.userDetailsService = userDetailsService;
+        this.encoder = encoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
     }
 
+//    @GetMapping("/all")
+//    public ResponseEntity<List<UserEntity>> getAllUsers() {
+//        return ResponseEntity.ok(service.getAllUsers());
+//    }
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginViewModel loginModel) throws Exception {
+    public ResponseEntity<String> login(@RequestBody LoginViewModel loginModel) {
         try {
             authenticate(loginModel.getEmail(), loginModel.getPassword());
             final UserDetails userDetails = userDetailsService
                     .loadUserByUsername(loginModel.getEmail());
             UserEntity user = service.getUserByEmail(userDetails.getUsername());
             final String token = jwtUtils.generateToken(user);
-            var response = new Object() {
-                public String tokenData = token;
-            };
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(token);
         } catch (Exception e) {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.INTERNAL_SERVER_ERROR);
         }

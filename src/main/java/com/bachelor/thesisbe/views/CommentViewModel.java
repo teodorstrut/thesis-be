@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -19,4 +20,5 @@ public class CommentViewModel {
     private Long postId;
     private Long parentId;
     private String ownerName;
+    private Date dateAdded;
 }

@@ -3,7 +3,6 @@ package com.bachelor.thesisbe.service;
 import com.bachelor.thesisbe.model.Forum;
 import com.bachelor.thesisbe.model.UserEntity;
 import com.bachelor.thesisbe.repo.ForumRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -13,8 +12,11 @@ import java.util.List;
 @Service
 @CrossOrigin
 public class ForumService {
-    @Autowired
-    private ForumRepo repo;
+    private final ForumRepo repo;
+
+    public ForumService(ForumRepo repo) {
+        this.repo = repo;
+    }
 
     public Forum addForum(UserEntity owner, String name, String description) {
         return repo.save(new Forum(owner, name, description, new HashSet<>()));
@@ -33,6 +35,6 @@ public class ForumService {
     }
 
     public Forum getById(Long id) {
-        return repo.findById(id).get();
+        return repo.findById(id).orElse(null);
     }
 }
