@@ -28,8 +28,8 @@ public class Post extends BaseObject {
     @JoinColumn(name = "forum_id", nullable = false)
     private Forum forum;
 
-    @ManyToMany(mappedBy = "likedPosts", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    Set<UserEntity> userLikes;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    Set<UserPostRating> userLikes;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)

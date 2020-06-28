@@ -48,7 +48,13 @@ public class UserEntity extends BaseObject {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
     Set<Comment> ownedComments;
 
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    Set<Post> likedPosts;
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "user")
+    Set<UserPostRating> postLikes;
 
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_followed_forums",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "forum_id"))
+    private Set<Forum> followedForums;
 }

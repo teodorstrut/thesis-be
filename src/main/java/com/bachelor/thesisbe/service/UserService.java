@@ -1,12 +1,15 @@
 package com.bachelor.thesisbe.service;
 
+import com.bachelor.thesisbe.model.Forum;
 import com.bachelor.thesisbe.model.UserEntity;
 import com.bachelor.thesisbe.repo.UserEntityRepo;
 import com.bachelor.thesisbe.views.RegisterViewModel;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -48,5 +51,20 @@ public class UserService {
         } else {
             return null;
         }
+    }
+
+    public void followForum(Long userId, Forum forum, boolean follow) {
+        Optional<UserEntity> userOptional = this.userRepo.findById(userId);
+        if (userOptional.isPresent()) {
+            UserEntity user = userOptional.get();
+            if (follow) {
+                user.getFollowedForums().add(forum);
+                this.userRepo.save(user);
+            } else {
+                user.getFollowedForums().remove(forum);
+                this.userRepo.save(user);
+            }
+        }
+
     }
 }

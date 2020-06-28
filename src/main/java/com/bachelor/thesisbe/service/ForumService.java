@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @CrossOrigin
@@ -19,7 +20,16 @@ public class ForumService {
     }
 
     public Forum addForum(UserEntity owner, String name, String description) {
-        return repo.save(new Forum(owner, name, description, new HashSet<>()));
+        return repo.save(new Forum(owner, name, description, new HashSet<>(), new HashSet<>()));
+    }
+
+    public void followForum(Long forumId, UserEntity user) {
+        Optional<Forum> optionalForum = this.repo.findById(forumId);
+        if(optionalForum.isPresent()){
+            Forum forum = optionalForum.get();
+            forum.getFollowingUsers().add(user);
+            repo.save(forum);
+        }
     }
 
     public void deleteForum(Long forumId) {

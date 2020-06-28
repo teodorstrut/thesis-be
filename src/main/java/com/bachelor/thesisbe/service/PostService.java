@@ -1,9 +1,8 @@
 package com.bachelor.thesisbe.service;
 
-import com.bachelor.thesisbe.model.Forum;
-import com.bachelor.thesisbe.model.Post;
-import com.bachelor.thesisbe.model.UserEntity;
+import com.bachelor.thesisbe.model.*;
 import com.bachelor.thesisbe.repo.PostRepo;
+import com.bachelor.thesisbe.repo.UserPostRatingRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,14 +12,16 @@ import java.util.Optional;
 
 @Service
 public class PostService {
-    private final PostRepo repo;
+    private final PostRepo postRepo;
+    private final UserPostRatingRepo ratingsRepo;
 
-    public PostService(PostRepo repo) {
-        this.repo = repo;
+    public PostService(PostRepo postRepo, UserPostRatingRepo ratingsRepo) {
+        this.postRepo = postRepo;
+        this.ratingsRepo = ratingsRepo;
     }
 
-    public void addPost(String title, String description, UserEntity owner, Forum parentForum, byte[] imageBlob) {
-        repo.save(new Post(
+    public Long addPost(String title, String description, UserEntity owner, Forum parentForum, byte[] imageBlob) {
+        Post newPost = postRepo.save(new Post(
                 title,
                 description,
                 owner,
@@ -29,22 +30,32 @@ public class PostService {
                 imageBlob,
                 new HashSet<>())
         );
+        return newPost.getId();
     }
 
-    public void likePost(Long userId, Long postId) {
-        repo.likePostNative(userId, postId);
+    public void likePost(UserEntity user, Post post, boolean isliked) {
+        Optional<UserPostRating> rating = ratingsRepo.findById(new UserPostKey(user.getId(), post.getId()));
+        if (rating.isPresent()) {
+            UserPostRating ratingEntity = rating.get();
+            if (ratingEntity.isLiked() != isliked) {
+                ratingEntity.setLiked(isliked);
+                ratingsRepo.save(ratingEntity);
+            }
+        } else {
+            ratingsRepo.save(new UserPostRating(user, post, isliked));
+        }
     }
 
     public void deletePost(Long postId, UserEntity user) {
-        Optional<Post> p = repo.findById(postId);
+        Optional<Post> p = postRepo.findById(postId);
         if (p.isPresent() && p.get().getOwner().getId().equals(user.getId())) {
-            repo.delete(p.get());
+            postRepo.delete(p.get());
         }
     }
 
     public List<Post> getPostsForForum(Forum forum) {
         ArrayList<Post> posts = new ArrayList<>();
-        repo.findAll().forEach(f -> {
+        postRepo.findAll().forEach(f -> {
             if (f.getForum().getId().equals(forum.getId())) {
                 posts.add(f);
             }
@@ -53,11 +64,11 @@ public class PostService {
     }
 
     public Post getPostById(long postId) {
-        return repo.findById(postId).orElse(null);
+        return postRepo.findById(postId).orElse(null);
     }
 
     public void savePost(Post post) {
-        repo.save(post);
+        postRepo.save(post);
     }
 
 }

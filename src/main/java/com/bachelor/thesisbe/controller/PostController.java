@@ -1,9 +1,6 @@
 package com.bachelor.thesisbe.controller;
 
-import com.bachelor.thesisbe.model.BaseObject;
-import com.bachelor.thesisbe.model.Forum;
-import com.bachelor.thesisbe.model.Post;
-import com.bachelor.thesisbe.model.UserEntity;
+import com.bachelor.thesisbe.model.*;
 import com.bachelor.thesisbe.service.ForumService;
 import com.bachelor.thesisbe.service.PostService;
 import com.bachelor.thesisbe.service.UserService;
@@ -32,15 +29,15 @@ public class PostController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> createPost(@RequestBody PostViewModel viewModel) {
+    public ResponseEntity<Long> createPost(@RequestBody PostViewModel viewModel) {
         byte[] imageByte = null;
         if (viewModel.getImage() != null && !viewModel.getImage().isEmpty()) {
             imageByte = parseBase64Binary(viewModel.getImage());
         }
         UserEntity user = this.userService.getUserById(viewModel.getUserId());
         Forum forum = this.forumService.getById(viewModel.getForumId());
-        this.postService.addPost(viewModel.getTitle(), viewModel.getDescription(), user, forum, imageByte);
-        return ResponseEntity.ok("Post added successfully");
+        Long newPostId = this.postService.addPost(viewModel.getTitle(), viewModel.getDescription(), user, forum, imageByte);
+        return ResponseEntity.ok(newPostId);
     }
 
     @DeleteMapping("/delete/{postId}")
@@ -52,15 +49,7 @@ public class PostController {
     public ResponseEntity<?> getAllPostsForForumId(@PathVariable("forumId") Long forumId) {
         ArrayList<PostViewModel> posts = new ArrayList<>();
         this.postService.getPostsForForum(this.forumService.getById(forumId)).forEach(
-                p -> posts.add(new PostViewModel(
-                        p.getId(),
-                        p.getTitle(),
-                        p.getOwner().getId(),
-                        p.getDescription(),
-                        p.getForum().getId(),
-                        p.getImage() != null ? printBase64Binary(p.getImage()) : null,
-                        new ArrayList<>(p.getUserLikes().stream().mapToLong(BaseObject::getId).boxed().collect(Collectors.toList()))
-                )));
+                p -> posts.add(createPostViewModel(p)));
         return ResponseEntity.ok(posts);
     }
 
@@ -68,20 +57,35 @@ public class PostController {
     public ResponseEntity<?> getPostById(@PathVariable("postId") Long postId) {
         Post returnedPost = this.postService.getPostById(postId);
         return ResponseEntity.ok(
-                new PostViewModel(
-                        returnedPost.getId(),
-                        returnedPost.getTitle(),
-                        returnedPost.getOwner().getId(),
-                        returnedPost.getDescription(),
-                        returnedPost.getForum().getId(),
-                        returnedPost.getImage() != null ? printBase64Binary(returnedPost.getImage()) : null,
-                        new ArrayList<>(returnedPost.getUserLikes().stream().mapToLong(BaseObject::getId).boxed().collect(Collectors.toList()))
-                ));
+                createPostViewModel(returnedPost));
     }
 
     @GetMapping("/like/{userId}/{postId}")
     public ResponseEntity<String> likePost(@PathVariable("userId") Long userId, @PathVariable("postId") Long postId) {
-        this.postService.likePost(userId, postId);
+        UserEntity requestingUser = this.userService.getUserById(userId);
+        Post likedPost = this.postService.getPostById(postId);
+        this.postService.likePost(requestingUser, likedPost, true);
         return ResponseEntity.ok("like successful");
+    }
+
+    @GetMapping("/dislike/{userId}/{postId}")
+    public ResponseEntity<String> dislikePost(@PathVariable("userId") Long userId, @PathVariable("postId") Long postId) {
+        UserEntity requestingUser = this.userService.getUserById(userId);
+        Post likedPost = this.postService.getPostById(postId);
+        this.postService.likePost(requestingUser, likedPost, false);
+        return ResponseEntity.ok("dislike successful");
+    }
+
+    private PostViewModel createPostViewModel(Post p) {
+        return new PostViewModel(
+                p.getId(),
+                p.getTitle(),
+                p.getOwner().getId(),
+                p.getDescription(),
+                p.getForum().getId(),
+                p.getImage() != null ? printBase64Binary(p.getImage()) : null,
+                p.getUserLikes().stream().filter(UserPostRating::isLiked).map(userPostRating -> userPostRating.getUser().getId()).collect(Collectors.toCollection(ArrayList::new)),
+                p.getUserLikes().stream().filter(userPostRating -> !userPostRating.isLiked()).map(userPostRating -> userPostRating.getUser().getId()).collect(Collectors.toCollection(ArrayList::new))
+        );
     }
 }

@@ -12,4 +12,6 @@ public class ForumViewModel {
     private Long userId;
     private String forumName;
     private String description;
+    private boolean isFollowed;
+    private int followers;
 }

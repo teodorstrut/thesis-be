@@ -23,4 +23,7 @@ public class Forum extends BaseObject {
     private String description;
     @OneToMany(mappedBy = "forum")
     private Set<Post> posts;
+
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "followedForums")
+    private Set<UserEntity> followingUsers;
 }

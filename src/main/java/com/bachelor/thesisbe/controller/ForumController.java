@@ -6,6 +6,8 @@ import com.bachelor.thesisbe.service.ForumService;
 import com.bachelor.thesisbe.service.UserService;
 import com.bachelor.thesisbe.views.ForumViewModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,15 +33,50 @@ public class ForumController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ForumViewModel>> getAllForums() {
+    public ResponseEntity<List<ForumViewModel>> getAllForums() throws Exception {
+        UserEntity user = this.getCurrentUserId();
         return ResponseEntity.ok(this.forumService.getAllForums().stream().map(forum ->
-                new ForumViewModel(forum.getId(), forum.getOwner().getId(), forum.getName(), forum.getDescription())
-        ).collect(Collectors.toList()));
+                buildForumViewModel(forum, user)).collect(Collectors.toList()));
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<ForumViewModel> getById(@PathVariable("id") Long id) {
-        Forum f = this.forumService.getById(id);
-        return ResponseEntity.ok(new ForumViewModel(f.getId(), f.getOwner().getId(), f.getName(), f.getDescription()));
+    public ResponseEntity<ForumViewModel> getById(@PathVariable("id") Long id) throws Exception {
+        Forum forum = this.forumService.getById(id);
+        UserEntity user = this.getCurrentUserId();
+        return ResponseEntity.ok(buildForumViewModel(forum, user));
+    }
+
+    @GetMapping("/follow/{userId}/{forumId}")
+    public ResponseEntity<String> followForum(@PathVariable("userId") Long userId, @PathVariable("forumId") Long forumId) {
+        Forum forum = this.forumService.getById(forumId);
+        this.userService.followForum(userId, forum, true);
+        return ResponseEntity.ok("Forum followed successfully!");
+    }
+
+    @GetMapping("/un-follow/{userId}/{forumId}")
+    public ResponseEntity<String> unFollowForum(@PathVariable("userId") Long userId, @PathVariable("forumId") Long forumId) {
+        Forum forum = this.forumService.getById(forumId);
+        this.userService.followForum(userId, forum ,false);
+        return ResponseEntity.ok("Forum followed successfully!");
+    }
+
+    private UserEntity getCurrentUserId() throws Exception {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            return this.userService.getUserByEmail(email);
+        } else {
+            throw new Exception("No user currently logged in!");
+        }
+    }
+
+    private ForumViewModel buildForumViewModel(Forum forum, UserEntity user) {
+        return new ForumViewModel(
+                forum.getId(),
+                forum.getOwner().getId(),
+                forum.getName(),
+                forum.getDescription(),
+                forum.getFollowingUsers().contains(user),
+                forum.getFollowingUsers().size());
     }
 }
