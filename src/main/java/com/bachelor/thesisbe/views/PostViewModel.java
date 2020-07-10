@@ -17,6 +17,6 @@ public class PostViewModel {
     public Long userId;
     public String description;
     public Long forumId;
-    public String image;
+    public FileViewModel file;
     public ArrayList<Long> likes, dislikes;
 }

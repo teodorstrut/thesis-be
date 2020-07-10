@@ -56,8 +56,14 @@ public class ForumController {
     @GetMapping("/un-follow/{userId}/{forumId}")
     public ResponseEntity<String> unFollowForum(@PathVariable("userId") Long userId, @PathVariable("forumId") Long forumId) {
         Forum forum = this.forumService.getById(forumId);
-        this.userService.followForum(userId, forum ,false);
+        this.userService.followForum(userId, forum, false);
         return ResponseEntity.ok("Forum followed successfully!");
+    }
+
+    @PostMapping("/update-description/{forumId}")
+    public ResponseEntity<String> updateForumDescription(@PathVariable("forumId") Long forumId, @RequestBody String newDescription) {
+        this.forumService.updateForumDescription(forumId,newDescription);
+        return ResponseEntity.ok("Fourm description updated successfully!");
     }
 
     private UserEntity getCurrentUserId() throws Exception {

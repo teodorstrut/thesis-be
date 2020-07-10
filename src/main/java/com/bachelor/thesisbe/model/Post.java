@@ -31,9 +31,9 @@ public class Post extends BaseObject {
     @OneToMany(mappedBy = "post", cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     Set<UserPostRating> userLikes;
 
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    private byte[] image;
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id")
+    private PostFile file;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "postId")
     private Set<Comment> comments;

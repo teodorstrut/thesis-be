@@ -12,8 +12,5 @@ import java.util.List;
 public interface ForumRepo extends CrudRepository<Forum, Long> {
     void deleteById(Long forumId);
 
-    @Query("update Forum f set f.description = :description WHERE f.id = :forumId")
-    void updateForumDescription(@Param("forumId") Long id, @Param("description") String description);
-
     List<Forum> findAll();
 }

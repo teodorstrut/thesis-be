@@ -25,7 +25,7 @@ public class ForumService {
 
     public void followForum(Long forumId, UserEntity user) {
         Optional<Forum> optionalForum = this.repo.findById(forumId);
-        if(optionalForum.isPresent()){
+        if (optionalForum.isPresent()) {
             Forum forum = optionalForum.get();
             forum.getFollowingUsers().add(user);
             repo.save(forum);
@@ -37,7 +37,12 @@ public class ForumService {
     }
 
     public void updateForumDescription(Long forumId, String newDescription) {
-        repo.updateForumDescription(forumId, newDescription);
+        Optional<Forum> forumOptional = repo.findById(forumId);
+        if (forumOptional.isPresent()) {
+            Forum forum = forumOptional.get();
+            forum.setDescription(newDescription);
+            repo.save(forum);
+        }
     }
 
     public List<Forum> getAllForums() {
