@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -67,14 +66,17 @@ public class PostService {
         }
     }
 
-    public List<Post> getPostsForForum(Forum forum) {
-        ArrayList<Post> posts = new ArrayList<>();
-        postRepo.findAll().forEach(f -> {
-            if (f.getForum().getId().equals(forum.getId())) {
-                posts.add(f);
-            }
-        });
-        return posts;
+    public List<Post> getPostsForForum(Long forumId, int pageSize, int pageIndex) {
+        List<Post> posts = postRepo.findByForum_IdOrderByCreatedDateDesc(forumId);
+        int start = pageIndex * pageSize;
+        int end = pageIndex * pageSize + pageSize;
+        if (start > posts.size()) {
+            start = posts.size();
+        }
+        if (end > posts.size()) {
+            end = posts.size();
+        }
+        return posts.subList(start, end);
     }
 
     public Post getPostById(long postId) {
@@ -129,7 +131,7 @@ public class PostService {
         } else {
             boolean directoriesCreated = directory.mkdirs();
             if (directoriesCreated) {
-                fileLocation += new Timestamp(currentDate.getTime()) + fileViewModel.getName();
+                fileLocation += fileTimestamp.format(new Timestamp(currentDate.getTime())) + fileViewModel.getName();
                 Path filePath = Paths.get(fileLocation);
                 Files.write(filePath, fileViewModel.getData());
             }

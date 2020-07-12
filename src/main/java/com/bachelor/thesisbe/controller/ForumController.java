@@ -1,5 +1,6 @@
 package com.bachelor.thesisbe.controller;
 
+import com.bachelor.thesisbe.exception.ForumDuplicateNameException;
 import com.bachelor.thesisbe.model.Forum;
 import com.bachelor.thesisbe.model.UserEntity;
 import com.bachelor.thesisbe.service.ForumService;
@@ -26,7 +27,7 @@ public class ForumController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Long> createForum(@RequestBody ForumViewModel viewModel) {
+    public ResponseEntity<Long> createForum(@RequestBody ForumViewModel viewModel) throws ForumDuplicateNameException {
         UserEntity user = this.userService.getUserById(viewModel.getUserId());
         Long forumId = this.forumService.addForum(user, viewModel.getForumName(), viewModel.getDescription()).getId();
         return ResponseEntity.ok(forumId);
@@ -62,7 +63,7 @@ public class ForumController {
 
     @PostMapping("/update-description/{forumId}")
     public ResponseEntity<String> updateForumDescription(@PathVariable("forumId") Long forumId, @RequestBody String newDescription) {
-        this.forumService.updateForumDescription(forumId,newDescription);
+        this.forumService.updateForumDescription(forumId, newDescription);
         return ResponseEntity.ok("Fourm description updated successfully!");
     }
 

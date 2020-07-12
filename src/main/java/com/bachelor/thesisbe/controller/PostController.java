@@ -43,10 +43,12 @@ public class PostController {
         return ResponseEntity.ok("Object removed successfully!");
     }
 
-    @GetMapping("/forum/{forumId}")
-    public ResponseEntity<?> getAllPostsForForumId(@PathVariable("forumId") Long forumId) {
+    @GetMapping("/forum/{forumId}/{pageIndex}/{pageSize}")
+    public ResponseEntity<?> getAllPostsForForumId(@PathVariable("forumId") Long forumId,
+                                                   @PathVariable("pageIndex") int pageIndex,
+                                                   @PathVariable("pageSize") int pageSize) {
         ArrayList<PostViewModel> posts = new ArrayList<>();
-        this.postService.getPostsForForum(this.forumService.getById(forumId)).forEach(
+        this.postService.getPostsForForum(forumId, pageSize, pageIndex).forEach(
                 p -> {
                     try {
                         posts.add(createPostViewModel(p));

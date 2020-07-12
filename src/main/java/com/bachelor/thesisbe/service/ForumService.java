@@ -1,5 +1,6 @@
 package com.bachelor.thesisbe.service;
 
+import com.bachelor.thesisbe.exception.ForumDuplicateNameException;
 import com.bachelor.thesisbe.model.Forum;
 import com.bachelor.thesisbe.model.UserEntity;
 import com.bachelor.thesisbe.repo.ForumRepo;
@@ -19,8 +20,12 @@ public class ForumService {
         this.repo = repo;
     }
 
-    public Forum addForum(UserEntity owner, String name, String description) {
-        return repo.save(new Forum(owner, name, description, new HashSet<>(), new HashSet<>()));
+    public Forum addForum(UserEntity owner, String name, String description) throws ForumDuplicateNameException {
+        try {
+            return repo.save(new Forum(owner, name, description, new HashSet<>(), new HashSet<>()));
+        } catch (Exception e) {
+            throw new ForumDuplicateNameException("The forum's name already exists");
+        }
     }
 
     public void followForum(Long forumId, UserEntity user) {

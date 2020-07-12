@@ -17,7 +17,8 @@ public class Forum extends BaseObject {
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity owner;
-    @Column
+
+    @Column(unique = true)
     private String name;
     @Column
     private String description;
