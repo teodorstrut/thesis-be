@@ -5,6 +5,7 @@ import com.bachelor.thesisbe.repo.PostFileRepo;
 import com.bachelor.thesisbe.repo.PostRepo;
 import com.bachelor.thesisbe.repo.UserPostRatingRepo;
 import com.bachelor.thesisbe.views.FileViewModel;
+import com.bachelor.thesisbe.views.PostViewModel;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -68,23 +69,11 @@ public class PostService {
 
     public List<Post> getPostsForForum(Long forumId, int pageSize, int pageIndex) {
         List<Post> posts = postRepo.findByForum_IdOrderByCreatedDateDesc(forumId);
-        int start = pageIndex * pageSize;
-        int end = pageIndex * pageSize + pageSize;
-        if (start > posts.size()) {
-            start = posts.size();
-        }
-        if (end > posts.size()) {
-            end = posts.size();
-        }
-        return posts.subList(start, end);
+        return getPostPageByPageIndexAndPageSize(pageIndex, pageSize, posts);
     }
 
     public Post getPostById(long postId) {
         return postRepo.findById(postId).orElse(null);
-    }
-
-    public void savePost(Post post) {
-        postRepo.save(post);
     }
 
     public void updatePostDescription(Long postId, String newDescription) {
@@ -94,6 +83,31 @@ public class PostService {
             post.setDescription(newDescription);
             postRepo.save(post);
         }
+    }
+
+    public List<Post> getNewestPosts(int pageIndex, int pageSize) {
+        List<Post> posts = new ArrayList<>(postRepo.findAllByOrderByCreatedDateDesc());
+
+        return getPostPageByPageIndexAndPageSize(pageIndex, pageSize, posts);
+    }
+
+    public List<Post> getPopularPosts(int pageIndex, int pageSize) {
+        List<Post> posts = new ArrayList<>(postRepo.findAllByOrderByCreatedDateDesc());
+        posts.sort(Comparator.comparingInt(post -> post.getUserLikes().size()));
+        Collections.reverse(posts);
+        return getPostPageByPageIndexAndPageSize(pageIndex, pageSize, posts);
+    }
+
+    private List<Post> getPostPageByPageIndexAndPageSize(int pageIndex, int pageSize, List<Post> posts) {
+        int start = pageIndex * pageSize;
+        int end = pageIndex * pageSize + pageSize;
+        if (start > posts.size()) {
+            start = posts.size();
+        }
+        if (end > posts.size()) {
+            end = posts.size();
+        }
+        return posts.subList(start, end);
     }
 
     private PostFile createFile(FileViewModel fileViewModel) throws Exception {

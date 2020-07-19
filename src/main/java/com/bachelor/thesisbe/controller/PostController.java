@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -88,6 +89,33 @@ public class PostController {
         return ResponseEntity.ok("Post description updated successful");
     }
 
+    @GetMapping("/newest/{pageIndex}/{pageSize}")
+    public ResponseEntity<List<PostViewModel>> getNewestPosts(@PathVariable("pageIndex") int pageIndex, @PathVariable("pageSize") int pageSize) {
+        List<PostViewModel> returnedList = new ArrayList<>();
+        postService.getNewestPosts(pageIndex, pageSize).forEach(post -> {
+            try {
+                returnedList.add(createPostViewModel(post));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return ResponseEntity.ok(returnedList);
+    }
+
+
+    @GetMapping("/popular/{pageIndex}/{pageSize}")
+    public ResponseEntity<List<PostViewModel>> getPopularPosts(@PathVariable("pageIndex") int pageIndex, @PathVariable("pageSize") int pageSize) {
+        List<PostViewModel> returnedList = new ArrayList<>();
+        postService.getPopularPosts(pageIndex, pageSize).forEach(post -> {
+            try {
+                returnedList.add(createPostViewModel(post));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return ResponseEntity.ok(returnedList);
+    }
+
     private PostViewModel createPostViewModel(Post p) throws IOException {
         return new PostViewModel(
                 p.getId(),
@@ -97,7 +125,9 @@ public class PostController {
                 p.getForum().getId(),
                 p.getFile() != null ? new FileViewModel(p.getFile().getFileType(), getFileData(p.getFile()), p.getFile().getFileName()) : null,
                 p.getUserLikes().stream().filter(UserPostRating::isLiked).map(userPostRating -> userPostRating.getUser().getId()).collect(Collectors.toCollection(ArrayList::new)),
-                p.getUserLikes().stream().filter(userPostRating -> !userPostRating.isLiked()).map(userPostRating -> userPostRating.getUser().getId()).collect(Collectors.toCollection(ArrayList::new))
+                p.getUserLikes().stream().filter(userPostRating -> !userPostRating.isLiked()).map(userPostRating -> userPostRating.getUser().getId()).collect(Collectors.toCollection(ArrayList::new)),
+                p.getOwner().getFirstName() + " " + p.getOwner().getLastName(),
+                p.getForum().getName()
         );
     }
 
