@@ -6,6 +6,7 @@ import com.bachelor.thesisbe.security.JwtUtils;
 import com.bachelor.thesisbe.security.UserDetailsService;
 import com.bachelor.thesisbe.service.UserService;
 import com.bachelor.thesisbe.views.LoginViewModel;
+import com.bachelor.thesisbe.views.PasswordResetRequestViewModel;
 import com.bachelor.thesisbe.views.RegisterViewModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +33,6 @@ public class SecurityController {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
     }
-
-//    @GetMapping("/all")
-//    public ResponseEntity<List<UserEntity>> getAllUsers() {
-//        return ResponseEntity.ok(service.getAllUsers());
-//    }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginViewModel loginModel) {
@@ -69,11 +65,6 @@ public class SecurityController {
         }
     }
 
-    @RequestMapping("/hello")
-    public String hello() {
-        return "Hello World!";
-    }
-
     private void authenticate(String email, String password) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
@@ -81,6 +72,28 @@ public class SecurityController {
             throw new Exception("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
             throw new Exception("INVALID_CREDENTIALS", e);
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> sendResetPasswordRequest(@RequestBody PasswordResetRequestViewModel passwordResetObject) {
+        try {
+            authenticate(passwordResetObject.getUserName(), passwordResetObject.getOldPassword());
+            passwordResetObject.setNewPassword(encoder.passwordEncoder().encode(passwordResetObject.getNewPassword()));
+            service.createNewPasswordResetRequest(passwordResetObject);
+            return ResponseEntity.ok("password change request sent successfully. Please check your email for the confirmation link!");
+        } catch (Exception e) {
+            return new ResponseEntity<>("Invalid email or password", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/confirm-password-reset/{userName}")
+    public ResponseEntity<String> sendResetPasswordRequest(@PathVariable("userName") String userName) {
+        try {
+            service.resetPassword(userName);
+            return ResponseEntity.ok("password has been reset successfully!");
+        } catch (Exception e) {
+            return new ResponseEntity<>("Invalid email or password", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

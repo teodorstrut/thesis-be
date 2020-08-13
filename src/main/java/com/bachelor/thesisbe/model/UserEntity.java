@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -35,8 +36,6 @@ public class UserEntity extends BaseObject {
     private String lastName;
 
     @Column
-    private String image;
-    @Column
     String colorCode;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
@@ -48,6 +47,9 @@ public class UserEntity extends BaseObject {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
     Set<Comment> ownedComments;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "requester")
+    Set<PasswordResetRequest> PasswordResetRequests;
+
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "user")
     Set<UserPostRating> postLikes;
 
@@ -57,4 +59,8 @@ public class UserEntity extends BaseObject {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "forum_id"))
     private Set<Forum> followedForums;
+
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] profileImage;
 }

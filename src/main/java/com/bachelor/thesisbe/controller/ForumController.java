@@ -1,5 +1,6 @@
 package com.bachelor.thesisbe.controller;
 
+import com.bachelor.thesisbe.enums.ForumFilterType;
 import com.bachelor.thesisbe.exception.ForumDuplicateNameException;
 import com.bachelor.thesisbe.model.Forum;
 import com.bachelor.thesisbe.model.UserEntity;
@@ -33,10 +34,10 @@ public class ForumController {
         return ResponseEntity.ok(forumId);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<ForumViewModel>> getAllForums() throws Exception {
+    @GetMapping("/filter/{filterType}/page-index/{pageIndex}/page-size/{pageSize}")
+    public ResponseEntity<List<ForumViewModel>> getAllForums(@PathVariable("filterType") ForumFilterType filterType, @PathVariable("pageIndex") Integer pageIndex, @PathVariable("pageSize") Integer pageSize) throws Exception {
         UserEntity user = this.getCurrentUserId();
-        return ResponseEntity.ok(this.forumService.getAllForums().stream().map(forum ->
+        return ResponseEntity.ok(this.forumService.getAllForums(filterType, user, pageIndex, pageSize).stream().map(forum ->
                 buildForumViewModel(forum, user)).collect(Collectors.toList()));
     }
 

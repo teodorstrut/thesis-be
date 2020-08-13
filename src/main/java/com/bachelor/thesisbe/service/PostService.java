@@ -5,7 +5,6 @@ import com.bachelor.thesisbe.repo.PostFileRepo;
 import com.bachelor.thesisbe.repo.PostRepo;
 import com.bachelor.thesisbe.repo.UserPostRatingRepo;
 import com.bachelor.thesisbe.views.FileViewModel;
-import com.bachelor.thesisbe.views.PostViewModel;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -57,13 +56,6 @@ public class PostService {
             }
         } else {
             ratingsRepo.save(new UserPostRating(user, post, isliked));
-        }
-    }
-
-    public void deletePost(Long postId, UserEntity user) {
-        Optional<Post> p = postRepo.findById(postId);
-        if (p.isPresent() && p.get().getOwner().getId().equals(user.getId())) {
-            postRepo.delete(p.get());
         }
     }
 

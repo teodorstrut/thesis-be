@@ -13,4 +13,8 @@ public interface ForumRepo extends CrudRepository<Forum, Long> {
     void deleteById(Long forumId);
 
     List<Forum> findAll();
+
+    List<Forum> findAllByOrderByNameAsc();
+
+    List<Forum> findAllByOrderByFollowingUsers();
 }

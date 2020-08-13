@@ -1,29 +1,28 @@
 package com.bachelor.thesisbe.service;
 
 import com.bachelor.thesisbe.model.Forum;
+import com.bachelor.thesisbe.model.PasswordResetRequest;
 import com.bachelor.thesisbe.model.UserEntity;
+import com.bachelor.thesisbe.repo.PasswordResetRequestRepo;
 import com.bachelor.thesisbe.repo.UserEntityRepo;
+import com.bachelor.thesisbe.views.PasswordResetRequestViewModel;
 import com.bachelor.thesisbe.views.RegisterViewModel;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class UserService {
     private final UserEntityRepo userRepo;
+    private final PasswordResetRequestRepo passwordResetRepo;
+    private final JavaMailSender javaMailSender;
 
-    public UserService(UserEntityRepo userRepo) {
+    public UserService(UserEntityRepo userRepo, PasswordResetRequestRepo passwordResetRepo, JavaMailSender javaMailSender) {
         this.userRepo = userRepo;
-    }
-
-    public List<UserEntity> getAllUsers() {
-        List<UserEntity> userList = new ArrayList<>();
-        userRepo.findAll().forEach(userList::add);
-        return userList;
+        this.passwordResetRepo = passwordResetRepo;
+        this.javaMailSender = javaMailSender;
     }
 
     public void registerUser(RegisterViewModel newUser) {
@@ -64,6 +63,61 @@ public class UserService {
                 user.getFollowedForums().remove(forum);
                 this.userRepo.save(user);
             }
+        }
+    }
+
+    public void updatePhoto(Long userId, byte[] imageData) {
+        Optional<UserEntity> userEntityOptional = this.userRepo.findById(userId);
+        if (userEntityOptional.isPresent()) {
+            UserEntity user = userEntityOptional.get();
+            user.setProfileImage(imageData);
+            this.userRepo.save(user);
+        }
+    }
+
+    public byte[] getUserProfileImage(Long userId) {
+        Optional<UserEntity> userEntityOptional = this.userRepo.findById(userId);
+        if (userEntityOptional.isPresent()) {
+            UserEntity user = userEntityOptional.get();
+            if (user.getProfileImage().length == 0) {
+                return null;
+            } else {
+                return user.getProfileImage();
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public void createNewPasswordResetRequest(PasswordResetRequestViewModel passwordResetObject) {
+        UserEntity user = userRepo.findByEmail(passwordResetObject.getUserName());
+
+        Date date = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        PasswordResetRequest oldPasswordResetRequest = passwordResetRepo.findByRequester(user);
+        if (oldPasswordResetRequest != null) {
+            oldPasswordResetRequest.setNewPassword(passwordResetObject.getNewPassword());
+            oldPasswordResetRequest.setPasswordResetExpirationTimestamp(calendar.getTime());
+            passwordResetRepo.save(oldPasswordResetRequest);
+        } else {
+            PasswordResetRequest newRequest = new PasswordResetRequest(calendar.getTime(), passwordResetObject.getNewPassword(), user);
+            passwordResetRepo.save(newRequest);
+        }
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo("teodorstrut@gmail.com");
+        message.setText("please reset your password here: http://localhost:4200/resetPassword/" + passwordResetObject.getUserName() + " .");
+        message.setSubject("Application reset password request");
+        this.javaMailSender.send(message);
+    }
+
+    public void resetPassword(String userName) {
+        UserEntity user = userRepo.findByEmail(userName);
+        PasswordResetRequest passwordResetRequest = passwordResetRepo.findByRequester(user);
+        if (passwordResetRequest.getPasswordResetExpirationTimestamp().after(new Date())) {
+            user.setPassword(passwordResetRequest.getNewPassword());
+            passwordResetRepo.delete(passwordResetRequest);
         }
     }
 }

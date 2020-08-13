@@ -39,11 +39,6 @@ public class PostController {
         return ResponseEntity.ok(newPostId);
     }
 
-    @DeleteMapping("/delete/{postId}")
-    public ResponseEntity<String> deletePost(@PathVariable("postId") Long postId) {
-        return ResponseEntity.ok("Object removed successfully!");
-    }
-
     @GetMapping("/forum/{forumId}/{pageIndex}/{pageSize}")
     public ResponseEntity<?> getAllPostsForForumId(@PathVariable("forumId") Long forumId,
                                                    @PathVariable("pageIndex") int pageIndex,

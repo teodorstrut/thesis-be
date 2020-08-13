@@ -42,7 +42,7 @@ public class SecurityManager extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/login", "/register", "/forums/all").permitAll()
+                .antMatchers("/login", "/register", "/forums/all", "/users").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .logout().and()
