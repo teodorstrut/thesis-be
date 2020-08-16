@@ -51,11 +51,12 @@ public class ForumService {
         switch (filterType) {
             case Newest:
                 forums.sort(Comparator.comparing(BaseObject::getCreatedDate));
-                getForumPageByPageIndexAndPageSize(pageIndex, pageSize, forums);
+                Collections.reverse(forums);
+                return getForumPageByPageIndexAndPageSize(pageIndex, pageSize, forums);
             case Subscribed:
                 forums.sort(Comparator.comparing(forum -> forum.getFollowingUsers().contains(user)));
                 Collections.reverse(forums);
-                getForumPageByPageIndexAndPageSize(pageIndex, pageSize, forums);
+                return getForumPageByPageIndexAndPageSize(pageIndex, pageSize, forums);
             case MostPopular:
                 forums.sort(Comparator.comparingInt(forum -> forum.getFollowingUsers().size()));
                 Collections.reverse(forums);

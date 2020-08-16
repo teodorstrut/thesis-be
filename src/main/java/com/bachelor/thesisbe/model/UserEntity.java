@@ -53,6 +53,9 @@ public class UserEntity extends BaseObject {
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER, mappedBy = "user")
     Set<UserPostRating> postLikes;
 
+    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "notifiedUser")
+    Set<Notification> notifications;
+
     @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_followed_forums",

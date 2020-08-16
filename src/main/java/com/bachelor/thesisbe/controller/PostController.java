@@ -1,7 +1,9 @@
 package com.bachelor.thesisbe.controller;
 
+import com.bachelor.thesisbe.enums.NotificationType;
 import com.bachelor.thesisbe.model.*;
 import com.bachelor.thesisbe.service.ForumService;
+import com.bachelor.thesisbe.service.NotificationService;
 import com.bachelor.thesisbe.service.PostService;
 import com.bachelor.thesisbe.service.UserService;
 import com.bachelor.thesisbe.views.FileViewModel;
@@ -24,11 +26,13 @@ public class PostController {
     private final UserService userService;
     private final PostService postService;
     private final ForumService forumService;
+    private final NotificationService notificationService;
 
-    public PostController(UserService userService, PostService postService, ForumService forumService) {
+    public PostController(UserService userService, PostService postService, ForumService forumService, NotificationService notificationService) {
         this.userService = userService;
         this.postService = postService;
         this.forumService = forumService;
+        this.notificationService = notificationService;
     }
 
     @PostMapping("/create")
@@ -36,6 +40,8 @@ public class PostController {
         UserEntity user = this.userService.getUserById(viewModel.getUserId());
         Forum forum = this.forumService.getById(viewModel.getForumId());
         Long newPostId = this.postService.addPost(viewModel.getTitle(), viewModel.getDescription(), user, forum, viewModel.getFile());
+        //notify subscribed users that a new post was added
+        this.createNewPostNotifications(forum, newPostId);
         return ResponseEntity.ok(newPostId);
     }
 
@@ -129,5 +135,17 @@ public class PostController {
     private byte[] getFileData(PostFile file) throws IOException {
         Path filePath = Paths.get(file.getFilePath());
         return Files.readAllBytes(filePath);
+    }
+
+    private void createNewPostNotifications(Forum forum, Long newPostId) {
+        List<Notification> newNotifications = new ArrayList<>();
+        forum.getPosts().forEach(post -> newNotifications.add(
+                new Notification(post.getOwner(),
+                        NotificationType.NewPostOnFollowedForum,
+                        "/post/" + newPostId,
+                        forum.getName(),
+                        false)
+        ));
+        notificationService.addNotifications(newNotifications);
     }
 }
