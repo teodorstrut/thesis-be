@@ -13,5 +13,5 @@ public class NotificationViewModel {
     private String target;
     private String navigationLink;
     private boolean seen;
-    private Long userId;
+    private Long id;
 }

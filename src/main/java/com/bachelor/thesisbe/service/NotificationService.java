@@ -6,6 +6,7 @@ import com.bachelor.thesisbe.repo.NotificationRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class NotificationService {
@@ -25,5 +26,14 @@ public class NotificationService {
 
     public List<Notification> getNotificationsForUser(UserEntity user) {
         return this.notificationRepo.findAllByNotifiedUser(user);
+    }
+
+    public void markNotificationAsSeen(Long notificationId) {
+        Optional<Notification> notificationOpt = this.notificationRepo.findById(notificationId);
+        if (notificationOpt.isPresent()) {
+            Notification notification = notificationOpt.get();
+            notification.setSeen(true);
+            this.notificationRepo.save(notification);
+        }
     }
 }

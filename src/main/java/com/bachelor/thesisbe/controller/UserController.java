@@ -50,11 +50,17 @@ public class UserController {
             String email = ((UserDetails) principal).getUsername();
             user = userService.getUserByEmail(email);
             notificationService.getNotificationsForUser(user).forEach(notification -> notificationList.add(
-                    new NotificationViewModel(notification.getNotificationType(), notification.getTarget(), notification.getNavigationLink(), notification.isSeen(), notification.getNotifiedUser().getId())
+                    new NotificationViewModel(notification.getNotificationType(), notification.getTarget(), notification.getNavigationLink(), notification.isSeen(), notification.getId())
             ));
             return ResponseEntity.ok(notificationList);
         } else {
             throw new Exception("No user currently logged in!");
         }
+    }
+
+    @GetMapping("/mark-as-seen/{notificationId}")
+    public ResponseEntity<String> markNotificationAsSeen(@PathVariable("notificationId") Long notificationId) {
+        this.notificationService.markNotificationAsSeen(notificationId);
+        return ResponseEntity.ok("notification saved successfully!");
     }
 }
